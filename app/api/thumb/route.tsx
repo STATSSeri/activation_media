@@ -126,6 +126,9 @@ export async function GET(req: Request) {
 			fonts: fontData
 				? [{ name: "Noto Sans JP", data: fontData, weight: 700, style: "normal" }]
 				: [],
+			headers: {
+				"cache-control": "public, max-age=86400, s-maxage=86400, immutable",
+			},
 		},
 	);
 }

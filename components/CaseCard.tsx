@@ -12,7 +12,8 @@ function thumbUrl(c: Case): string {
 	const p = new URLSearchParams();
 	p.set("t", c.type ?? "未分類");
 	if (c.brand) p.set("b", c.brand);
-	p.set("s", c.summary || c.whyItWorked || c.title);
+	// 概要はRSS原文（英語）のため、日本語で書かれた「なぜ効いたか」を見出しに使う
+	p.set("s", c.whyItWorked || c.summary || c.title);
 	if (c.media) p.set("m", c.media);
 	if (c.region) p.set("r", c.region);
 	p.set("a", c.attention);
