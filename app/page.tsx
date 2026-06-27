@@ -1,22 +1,22 @@
-import { fetchCases, startOfTodayJstIso, type Case } from "@/lib/notion";
+import { fetchCases, startOfTodayJstIso, SECTIONS, type Case, type Section } from "@/lib/notion";
 import CaseCard from "@/components/CaseCard";
 import FilterBar from "@/components/FilterBar";
 
-// Notion を都度読むため動的レンダリング（ビルド時に env 無しで実行されない）
 export const dynamic = "force-dynamic";
 
 type SP = Record<string, string | string[] | undefined>;
-
 function str(v: string | string[] | undefined): string {
 	return typeof v === "string" ? v : "";
 }
 
+const ATT_ORDER: Record<string, number> = { "◎": 0, "○": 1, "-": 2 };
+
 export default async function Page({ searchParams }: { searchParams: Promise<SP> }) {
 	const sp = await searchParams;
 	const q = str(sp.q).trim();
-	const type = str(sp.type);
 	const view = sp.view === "today" ? "today" : "";
 	const focus = sp.focus === "1" ? "1" : "";
+	const sectionFilter = str(sp.section);
 
 	let all: Case[] = [];
 	let error: string | null = null;
@@ -26,18 +26,36 @@ export default async function Page({ searchParams }: { searchParams: Promise<SP>
 		error = (e as Error).message;
 	}
 
-	const types = [...new Set(all.map((c) => c.type).filter((t): t is string => Boolean(t)))].sort();
-
 	let cases = all;
-	if (type) cases = cases.filter((c) => c.type === type);
+	if (sectionFilter) cases = cases.filter((c) => c.section === sectionFilter);
 	if (focus) cases = cases.filter((c) => c.attention === "◎" || c.attention === "○");
 	if (q) {
-		const needle = q.toLowerCase();
+		const n = q.toLowerCase();
 		cases = cases.filter((c) =>
-			[c.title, c.brand, c.summary, c.whyItWorked, c.media, c.people, c.region ?? ""]
+			[c.jpHeadline, c.jpSummary, c.title, c.brand, c.media, c.people, c.region ?? ""]
 				.join(" ")
 				.toLowerCase()
-				.includes(needle),
+				.includes(n),
+		);
+	}
+
+	const filtered = Boolean(q || focus || sectionFilter); // 絞り込み中はフラット表示
+
+	// 今朝の注目（◎）を先頭に。重複を避けてセクションからは除外。
+	const lead = cases.filter((c) => c.attention === "◎").slice(0, 4);
+	const leadIds = new Set(lead.map((c) => c.id));
+
+	const bySection = new Map<Section, Case[]>();
+	for (const s of SECTIONS) bySection.set(s, []);
+	for (const c of cases) {
+		if (leadIds.has(c.id)) continue;
+		bySection.get(c.section)?.push(c);
+	}
+	for (const arr of bySection.values()) {
+		arr.sort(
+			(a, b) =>
+				(ATT_ORDER[a.attention] ?? 2) - (ATT_ORDER[b.attention] ?? 2) ||
+				(b.date ?? "").localeCompare(a.date ?? ""),
 		);
 	}
 
@@ -46,10 +64,10 @@ export default async function Page({ searchParams }: { searchParams: Promise<SP>
 			<header className="site-head">
 				<div className="site-head-inner">
 					<div className="brand">
-						<h1>Activation Radar</h1>
+						<h1>S/NEWS_CEO</h1>
 						<span className="count">{error ? "—" : `${cases.length} 件`}</span>
 					</div>
-					<FilterBar types={types} current={{ q, type, view, focus }} />
+					<FilterBar current={{ q, view, focus, section: sectionFilter }} />
 				</div>
 			</header>
 
@@ -62,14 +80,46 @@ export default async function Page({ searchParams }: { searchParams: Promise<SP>
 					</p>
 				) : cases.length === 0 ? (
 					<p className="empty">
-						{view === "today" ? "今朝の新着はまだありません。" : "該当する事例がありません。"}
+						{view === "today" ? "今朝の新着はまだありません。" : "該当する記事がありません。"}
 					</p>
-				) : (
+				) : filtered ? (
 					<section className="gallery-grid">
 						{cases.map((c) => (
 							<CaseCard key={c.id} c={c} />
 						))}
 					</section>
+				) : (
+					<>
+						{lead.length > 0 && (
+							<section className="news-section">
+								<div className="section-head section-head-lead">
+									<h2>☀️ 今朝の注目</h2>
+								</div>
+								<div className="gallery-grid">
+									{lead.map((c) => (
+										<CaseCard key={`lead-${c.id}`} c={c} />
+									))}
+								</div>
+							</section>
+						)}
+						{SECTIONS.map((s) => {
+							const arr = bySection.get(s) ?? [];
+							if (arr.length === 0) return null;
+							return (
+								<section key={s} className="news-section">
+									<div className="section-head">
+										<h2>{s}</h2>
+										<span className="section-count">{arr.length}</span>
+									</div>
+									<div className="gallery-grid">
+										{arr.map((c) => (
+											<CaseCard key={c.id} c={c} />
+										))}
+									</div>
+								</section>
+							);
+						})}
+					</>
 				)}
 			</div>
 		</>

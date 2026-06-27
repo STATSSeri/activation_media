@@ -8,8 +8,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
 	return (
 		<main className="login">
 			<form className="login-card" method="POST" action="/api/login">
-				<h1>Activation Radar</h1>
-				<p>毎朝のブランドアクティベーション事例ギャラリー</p>
+				<h1>S/NEWS_CEO</h1>
+				<p>スタッツCEO向け 毎朝ニュースブリーフ</p>
 				<input type="hidden" name="next" value={next} />
 				<input type="password" name="password" placeholder="パスワード" autoFocus required />
 				{error && <p className="login-error">パスワードが違います</p>}

@@ -2,26 +2,35 @@ import { Client, isFullPage } from "@notionhq/client";
 
 export type Attention = "◎" | "○" | "-";
 
+// 新聞のセクション（表示順）
+export const SECTIONS = [
+	"アクティベーション事例",
+	"ラグジュアリー・クライアント",
+	"インフルエンサー・SNS",
+	"広告・マーケ・キャスティング",
+	"経営・テック",
+] as const;
+export type Section = (typeof SECTIONS)[number];
+
 export type Case = {
 	id: string;
-	title: string;
-	type: string | null; // 施策タイプ
-	subTypes: string[]; // サブ施策タイプ
+	title: string; // 原題
+	section: Section; // セクション（空なら アクティベーション事例 に寄せる）
+	jpHeadline: string; // 日本語見出し
+	jpSummary: string; // 日本語要約
+	type: string | null; // 施策タイプ（アクティベーションのみ）
 	brand: string;
-	category: string | null; // ブランドカテゴリ
-	region: string | null; // 国・地域
-	people: string; // 起用人物
-	summary: string; // 概要
-	whyItWorked: string; // なぜ効いたか
+	category: string | null;
+	region: string | null;
+	people: string;
+	whyItWorked: string;
 	sourceUrl: string;
-	media: string; // 媒体名
-	attention: Attention; // 注目度
-	status: string; // ステータス
-	date: string | null; // 取得日（ISO）
-	thumbnail: string | null; // サムネイル
+	media: string;
+	attention: Attention;
+	status: string;
+	date: string | null;
 };
 
-// Notion のプロパティ値は型が複雑なので、抽出だけ any で受けて整形する。
 function richText(prop: any): string {
 	const arr = prop?.rich_text ?? prop?.title ?? [];
 	return Array.isArray(arr) ? arr.map((t: any) => t.plain_text ?? "").join("") : "";
@@ -36,12 +45,11 @@ function notionClient(): Client {
 	return new Client({ auth });
 }
 
-const MAX_PAGES = 3; // 最大 300件まで（100件 × 3ページ）
+const MAX_PAGES = 6; // 最大 600件
 
 /**
  * 「確認済み / 保存」のレコードを取得日の新しい順で取得する。
  * sinceIso を渡すと「取得日 >= sinceIso」に絞る（今朝の新着など）。
- * 環境変数が未設定なら空配列（呼び出し側でエラー表示）。
  */
 export async function fetchCases(opts?: { sinceIso?: string }): Promise<Case[]> {
 	const dataSourceId = process.env.ACTIVATION_DATA_SOURCE_ID;
@@ -76,23 +84,27 @@ export async function fetchCases(opts?: { sinceIso?: string }): Promise<Case[]> 
 		for (const page of res.results) {
 			if (!isFullPage(page)) continue;
 			const p: any = page.properties;
+			const sectionRaw = selectName(p["セクション"]);
+			const section = (SECTIONS as readonly string[]).includes(sectionRaw ?? "")
+				? (sectionRaw as Section)
+				: "アクティベーション事例"; // 旧レコード（未設定）は事例セクションへ
 			cases.push({
 				id: page.id,
 				title: richText(p["タイトル"]),
+				section,
+				jpHeadline: richText(p["日本語見出し"]),
+				jpSummary: richText(p["日本語要約"]),
 				type: selectName(p["施策タイプ"]),
-				subTypes: (p["サブ施策タイプ"]?.multi_select ?? []).map((s: any) => s.name),
 				brand: richText(p["ブランド名"]),
 				category: selectName(p["ブランドカテゴリ"]),
 				region: selectName(p["国・地域"]),
 				people: richText(p["起用人物"]),
-				summary: richText(p["概要"]),
 				whyItWorked: richText(p["なぜ効いたか"]),
 				sourceUrl: p["ソースURL"]?.url ?? "",
 				media: richText(p["媒体名"]),
 				attention: (selectName(p["注目度"]) as Attention) ?? "-",
 				status: selectName(p["ステータス"]) ?? "",
 				date: p["取得日"]?.date?.start ?? null,
-				thumbnail: p["サムネイル"]?.url ?? null,
 			});
 		}
 		cursor = res.has_more ? (res.next_cursor ?? undefined) : undefined;

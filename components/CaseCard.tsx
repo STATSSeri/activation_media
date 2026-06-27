@@ -1,5 +1,7 @@
 import type { Case } from "@/lib/notion";
 
+const THUMB_VERSION = "3"; // デザイン変更時に上げてCDNキャッシュ更新
+
 function fmtDate(iso: string | null): string {
 	if (!iso) return "";
 	const d = new Date(iso);
@@ -7,17 +9,14 @@ function fmtDate(iso: string | null): string {
 	return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")}`;
 }
 
-// サムネのデザインを変えたらここを上げてCDNキャッシュを更新する
-const THUMB_VERSION = "2";
-
 /** 既存の日本語データから「一瞬で分かる」サムネ画像URL（/api/thumb）を組み立てる。 */
 function thumbUrl(c: Case): string {
 	const p = new URLSearchParams();
 	p.set("v", THUMB_VERSION);
-	p.set("t", c.type ?? "未分類");
+	p.set("sec", c.section);
+	if (c.type) p.set("t", c.type);
 	if (c.brand) p.set("b", c.brand);
-	// 概要はRSS原文（英語）のため、日本語で書かれた「なぜ効いたか」を見出しに使う
-	p.set("s", c.whyItWorked || c.summary || c.title);
+	p.set("s", c.jpHeadline || c.whyItWorked || c.title);
 	if (c.media) p.set("m", c.media);
 	if (c.region) p.set("r", c.region);
 	p.set("a", c.attention);
@@ -25,6 +24,8 @@ function thumbUrl(c: Case): string {
 }
 
 export default function CaseCard({ c }: { c: Case }) {
+	const title = c.jpHeadline || c.title || "(無題)";
+	const body = c.jpSummary || c.whyItWorked || "";
 	return (
 		<a className="card" href={c.sourceUrl || "#"} target="_blank" rel="noreferrer">
 			<div className="card-thumb">
@@ -33,13 +34,19 @@ export default function CaseCard({ c }: { c: Case }) {
 			</div>
 			<div className="card-body">
 				<div className="card-meta">
-					{c.type && <span className="tag">{c.type}</span>}
-					{c.category && <span className="tag tag-ghost">{c.category}</span>}
+					{c.type ? (
+						<span className="tag">{c.type}</span>
+					) : (
+						<span className="tag">{c.section}</span>
+					)}
 					{c.region && <span className="tag tag-ghost">{c.region}</span>}
+					{c.attention !== "-" && <span className="tag tag-att">{c.attention}</span>}
 				</div>
-				<h2 className="card-title">{c.title || "(無題)"}</h2>
-				<div className="card-sub">{[c.brand, c.media].filter(Boolean).join(" ・ ")}</div>
-				{c.whyItWorked && <p className="card-why">{c.whyItWorked}</p>}
+				<h3 className="card-title">{title}</h3>
+				{(c.brand || c.media) && (
+					<div className="card-sub">{[c.brand, c.media].filter(Boolean).join(" ・ ")}</div>
+				)}
+				{body && <p className="card-why">{body}</p>}
 				<div className="card-foot">
 					<span>{fmtDate(c.date)}</span>
 					{c.people && <span className="card-people">{c.people}</span>}

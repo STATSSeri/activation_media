@@ -2,8 +2,8 @@ import "./globals.css";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-	title: "Activation Radar",
-	description: "ブランドアクティベーション事例ギャラリー",
+	title: "S/NEWS_CEO",
+	description: "スタッツCEO向け 毎朝ニュースブリーフ",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

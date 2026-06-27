@@ -129,6 +129,39 @@ a {
 	margin: 0 auto;
 	padding: 24px;
 }
+
+/* ---- 新聞セクション ---- */
+.news-section {
+	margin-bottom: 36px;
+}
+.section-head {
+	display: flex;
+	align-items: baseline;
+	gap: 10px;
+	margin: 8px 0 16px;
+	padding-bottom: 8px;
+	border-bottom: 2px solid var(--ink);
+}
+.section-head h2 {
+	margin: 0;
+	font-family: Georgia, serif;
+	font-size: 20px;
+	letter-spacing: 0.02em;
+}
+.section-head-lead {
+	border-bottom-color: var(--accent);
+}
+.section-head-lead h2 {
+	color: var(--accent-ink);
+}
+.section-count {
+	color: var(--muted);
+	font-size: 13px;
+}
+.tag-att {
+	background: var(--ink);
+	color: #fff;
+}
 .gallery-grid {
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);

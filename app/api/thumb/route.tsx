@@ -17,6 +17,15 @@ const TYPE_COLORS: Record<string, [string, string]> = {
 	"未分類": ["#1c1c1c", "#6a5c44"],
 };
 
+// セクションごとの背景色（施策タイプが無い記事はこちらで色分け）
+const SECTION_COLORS: Record<string, [string, string]> = {
+	"アクティベーション事例": ["#1e1838", "#6a4fb0"],
+	"ラグジュアリー・クライアント": ["#2a230f", "#b08d3f"],
+	"インフルエンサー・SNS": ["#2a0f24", "#a83b76"],
+	"広告・マーケ・キャスティング": ["#0f243f", "#2f6fb0"],
+	"経営・テック": ["#0f2a1c", "#2f9e6a"],
+};
+
 function clip(s: string, n: number): string {
 	const t = s.trim();
 	return t.length > n ? `${t.slice(0, n - 1)}…` : t;
@@ -43,15 +52,21 @@ async function loadJpFont(text: string): Promise<ArrayBuffer | null> {
 
 export async function GET(req: Request) {
 	const { searchParams } = new URL(req.url);
-	const type = searchParams.get("t") || "未分類";
+	const type = searchParams.get("t") || "";
+	const section = searchParams.get("sec") || "";
 	const brand = searchParams.get("b") || "";
 	const headline = clip(searchParams.get("s") || "", 40);
 	const media = searchParams.get("m") || "";
 	const region = searchParams.get("r") || "";
 	const attention = searchParams.get("a") || "-";
 
-	const [bg1, bg2] = TYPE_COLORS[type] ?? TYPE_COLORS["その他"];
-	const fontText = `${type}${brand}${headline}${media}${region}・◎○ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789／`;
+	// 色：施策タイプ優先（アクティベーション）→ 無ければセクション色
+	const chip = type || section || "ニュース";
+	const [bg1, bg2] =
+		(type && TYPE_COLORS[type]) ||
+		SECTION_COLORS[section] ||
+		SECTION_COLORS["広告・マーケ・キャスティング"];
+	const fontText = `${chip}${brand}${headline}${media}${region}・◎○ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789／`;
 	const fontData = await loadJpFont(fontText);
 
 	return new ImageResponse(
@@ -82,7 +97,7 @@ export async function GET(req: Request) {
 							borderRadius: 10,
 						}}
 					>
-						{type}
+						{chip}
 					</div>
 					{region ? (
 						<div
