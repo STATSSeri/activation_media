@@ -45,7 +45,7 @@ export async function GET(req: Request) {
 	const { searchParams } = new URL(req.url);
 	const type = searchParams.get("t") || "未分類";
 	const brand = searchParams.get("b") || "";
-	const headline = clip(searchParams.get("s") || "", 54);
+	const headline = clip(searchParams.get("s") || "", 40);
 	const media = searchParams.get("m") || "";
 	const region = searchParams.get("r") || "";
 	const attention = searchParams.get("a") || "-";
@@ -63,7 +63,7 @@ export async function GET(req: Request) {
 					display: "flex",
 					flexDirection: "column",
 					justifyContent: "space-between",
-					padding: 56,
+					padding: 48,
 					background: `linear-gradient(135deg, ${bg1} 0%, ${bg2} 100%)`,
 					fontFamily: "Noto Sans JP",
 					color: "#ffffff",
@@ -105,11 +105,11 @@ export async function GET(req: Request) {
 				{/* 中段：ブランド名＋見出し（概要） */}
 				<div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
 					{brand ? (
-						<div style={{ display: "flex", fontSize: 36, fontWeight: 700, color: "#ffe27a" }}>
-							{clip(brand, 26)}
+						<div style={{ display: "flex", fontSize: 32, fontWeight: 700, color: "#ffe27a" }}>
+							{clip(brand, 24)}
 						</div>
 					) : null}
-					<div style={{ display: "flex", fontSize: 52, fontWeight: 700, lineHeight: 1.3 }}>
+					<div style={{ display: "flex", fontSize: 46, fontWeight: 700, lineHeight: 1.3 }}>
 						{headline}
 					</div>
 				</div>

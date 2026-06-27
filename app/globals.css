@@ -131,8 +131,18 @@ a {
 }
 .gallery-grid {
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-	gap: 20px;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 24px;
+}
+@media (max-width: 1024px) {
+	.gallery-grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+@media (max-width: 640px) {
+	.gallery-grid {
+		grid-template-columns: 1fr;
+	}
 }
 .card {
 	display: flex;
