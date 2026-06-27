@@ -7,9 +7,13 @@ function fmtDate(iso: string | null): string {
 	return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")}`;
 }
 
+// サムネのデザインを変えたらここを上げてCDNキャッシュを更新する
+const THUMB_VERSION = "2";
+
 /** 既存の日本語データから「一瞬で分かる」サムネ画像URL（/api/thumb）を組み立てる。 */
 function thumbUrl(c: Case): string {
 	const p = new URLSearchParams();
+	p.set("v", THUMB_VERSION);
 	p.set("t", c.type ?? "未分類");
 	if (c.brand) p.set("b", c.brand);
 	// 概要はRSS原文（英語）のため、日本語で書かれた「なぜ効いたか」を見出しに使う
