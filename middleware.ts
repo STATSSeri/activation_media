@@ -3,7 +3,7 @@ import { AUTH_COOKIE, expectedToken } from "@/lib/auth";
 
 // login / api/login / 静的アセット 以外の全リクエストにかける
 export const config = {
-	matcher: ["/((?!login|api/login|_next/static|_next/image|favicon.ico).*)"],
+	matcher: ["/((?!login|api/login|_next/static|_next/image|favicon.ico|icon).*)"],
 };
 
 export async function middleware(req: NextRequest) {
