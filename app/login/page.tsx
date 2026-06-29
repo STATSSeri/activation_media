@@ -8,7 +8,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
 	return (
 		<main className="login">
 			<form className="login-card" method="POST" action="/api/login">
-				<h1>S/NEWS_CEO</h1>
+				<h1>S/NEWS</h1>
 				<p>スタッツCEO向け 毎朝ニュースブリーフ</p>
 				<input type="hidden" name="next" value={next} />
 				<input type="password" name="password" placeholder="パスワード" autoFocus required />

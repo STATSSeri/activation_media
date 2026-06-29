@@ -66,7 +66,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<SP>
 			<header className="site-head">
 				<div className="site-head-inner">
 					<div className="brand">
-						<h1>S/NEWS_CEO</h1>
+						<h1>S/NEWS</h1>
 						<span className="count">{error ? "—" : `${cases.length} 件`}</span>
 					</div>
 					<FilterBar current={{ q, view, focus, section: sectionFilter, best }} />
