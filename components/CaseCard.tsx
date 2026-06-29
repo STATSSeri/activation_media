@@ -34,6 +34,9 @@ export default function CaseCard({ c }: { c: Case }) {
 			</div>
 			<div className="card-body">
 				<div className="card-meta">
+					{(c.caseScore === "S" || c.caseScore === "A") && (
+						<span className={`tag tag-score score-${c.caseScore}`}>事例{c.caseScore}</span>
+					)}
 					{c.type ? (
 						<span className="tag">{c.type}</span>
 					) : (

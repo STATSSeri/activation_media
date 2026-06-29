@@ -162,6 +162,17 @@ a {
 	background: var(--ink);
 	color: #fff;
 }
+.tag-score {
+	color: #fff;
+	font-weight: 700;
+	letter-spacing: 0.02em;
+}
+.score-S {
+	background: #b8923f;
+}
+.score-A {
+	background: #a9824c;
+}
 .gallery-grid {
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);

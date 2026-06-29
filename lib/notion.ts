@@ -27,6 +27,7 @@ export type Case = {
 	sourceUrl: string;
 	media: string;
 	attention: Attention;
+	caseScore: string; // 事例評価 S/A/B/C（アクティベーションのみ）
 	status: string;
 	date: string | null;
 };
@@ -103,6 +104,7 @@ export async function fetchCases(opts?: { sinceIso?: string }): Promise<Case[]> 
 				sourceUrl: p["ソースURL"]?.url ?? "",
 				media: richText(p["媒体名"]),
 				attention: (selectName(p["注目度"]) as Attention) ?? "-",
+				caseScore: selectName(p["事例評価"]) ?? "",
 				status: selectName(p["ステータス"]) ?? "",
 				date: p["取得日"]?.date?.start ?? null,
 			});

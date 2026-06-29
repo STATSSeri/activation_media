@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { SECTIONS } from "@/lib/notion";
 
-export type FilterState = { q: string; view: string; focus: string; section: string };
+export type FilterState = { q: string; view: string; focus: string; section: string; best: string };
 
 type Props = {
 	current: FilterState;
@@ -21,6 +21,7 @@ export default function FilterBar({ current }: Props) {
 		if (merged.view) p.set("view", merged.view);
 		if (merged.focus) p.set("focus", merged.focus);
 		if (merged.section) p.set("section", merged.section);
+		if (merged.best) p.set("best", merged.best);
 		const qs = p.toString();
 		router.push(qs ? `/?${qs}` : "/");
 	}
@@ -68,6 +69,14 @@ export default function FilterBar({ current }: Props) {
 				onClick={() => go({ focus: current.focus ? "" : "1" })}
 			>
 				★ 注目（◎○）のみ
+			</button>
+
+			<button
+				type="button"
+				className={current.best ? "chip on" : "chip"}
+				onClick={() => go({ best: current.best ? "" : "1" })}
+			>
+				🏆 優良事例（S/A）
 			</button>
 		</div>
 	);

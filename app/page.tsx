@@ -17,6 +17,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<SP>
 	const view = sp.view === "today" ? "today" : "";
 	const focus = sp.focus === "1" ? "1" : "";
 	const sectionFilter = str(sp.section);
+	const best = sp.best === "1" ? "1" : "";
 
 	let all: Case[] = [];
 	let error: string | null = null;
@@ -29,6 +30,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<SP>
 	let cases = all;
 	if (sectionFilter) cases = cases.filter((c) => c.section === sectionFilter);
 	if (focus) cases = cases.filter((c) => c.attention === "◎" || c.attention === "○");
+	if (best) cases = cases.filter((c) => c.caseScore === "S" || c.caseScore === "A");
 	if (q) {
 		const n = q.toLowerCase();
 		cases = cases.filter((c) =>
@@ -39,7 +41,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<SP>
 		);
 	}
 
-	const filtered = Boolean(q || focus || sectionFilter); // 絞り込み中はフラット表示
+	const filtered = Boolean(q || focus || sectionFilter || best); // 絞り込み中はフラット表示
 
 	// 今朝の注目（◎）を先頭に。重複を避けてセクションからは除外。
 	const lead = cases.filter((c) => c.attention === "◎").slice(0, 4);
@@ -67,7 +69,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<SP>
 						<h1>S/NEWS_CEO</h1>
 						<span className="count">{error ? "—" : `${cases.length} 件`}</span>
 					</div>
-					<FilterBar current={{ q, view, focus, section: sectionFilter }} />
+					<FilterBar current={{ q, view, focus, section: sectionFilter, best }} />
 				</div>
 			</header>
 
